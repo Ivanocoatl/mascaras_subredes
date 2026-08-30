@@ -11,18 +11,15 @@
 
         body {
             font-family: 'Space Mono', monospace;
-            background-color: #0f172a; /* Slate 900 */
-            color: #f8fafc; /* Slate 50 */
+            background-color: #0f172a;
+            color: #f8fafc;
             overflow-x: hidden;
-            /* Prevent pull-to-refresh on mobile */
             overscroll-behavior-y: contain;
         }
 
-        .pixel-font {
-            font-family: 'Press Start 2P', cursive;
-        }
+        .pixel-font { font-family: 'Press Start 2P', cursive; }
 
-        /* Bit Box Styling */
+        /* Modified Bit Box Styling for Switches */
         .bit-box {
             display: inline-flex;
             justify-content: center;
@@ -35,24 +32,57 @@
             font-size: 0.8rem;
             transition: all 0.2s ease;
             user-select: none;
+            position: relative;
         }
         
         @media (min-width: 640px) {
             .bit-box { width: 24px; height: 32px; font-size: 0.9rem; margin: 2px;}
         }
 
-        /* Colors for different bits */
-        .bit-ip { background-color: #3b82f6; color: white; border: 1px solid #2563eb; } /* Blue */
-        .bit-mask-1 { background-color: #10b981; color: white; border: 1px solid #059669; } /* Green */
-        .bit-mask-0 { background-color: #ef4444; color: white; border: 1px solid #dc2626; } /* Red */
-        .bit-result-net { background-color: #8b5cf6; color: white; border: 1px solid #7c3aed; box-shadow: 0 0 8px #8b5cf6; } /* Purple */
-        .bit-result-host { background-color: #475569; color: #94a3b8; border: 1px solid #334155; } /* Gray */
+        /* Switch styles */
+        .switch-on {
+            background-color: #3b82f6; 
+            color: white; 
+            border: 1px solid #60a5fa;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 0 8px rgba(59, 130, 246, 0.6);
+            border-bottom: 3px solid #1d4ed8;
+            transform: translateY(-1px);
+        }
+        .switch-off {
+            background-color: #1e293b; 
+            color: #475569; 
+            border: 1px solid #334155;
+            box-shadow: inset 0 3px 5px rgba(0,0,0,0.5);
+            border-bottom: 1px solid #0f172a;
+            transform: translateY(1px);
+        }
+
+        .bit-mask-1 { background-color: #10b981; color: white; border: 1px solid #059669; }
+        .bit-mask-0 { background-color: #ef4444; color: white; border: 1px solid #dc2626; }
+        .bit-result-net { background-color: #8b5cf6; color: white; border: 1px solid #7c3aed; box-shadow: 0 0 8px #8b5cf6; }
+        .bit-result-host { background-color: #475569; color: #94a3b8; border: 1px solid #334155; }
         .bit-unknown { background-color: #1e293b; color: #64748b; border: 1px dashed #334155; }
+
+        .octet-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-right: 4px;
+        }
+
+        .bit-headers {
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            font-size: 0.45rem;
+            color: #64748b;
+            margin-bottom: 2px;
+            font-weight: bold;
+        }
 
         .octet-group {
             display: flex;
             flex-wrap: nowrap;
-            margin-right: 4px;
             padding: 2px;
             background: rgba(255,255,255,0.03);
             border-radius: 6px;
@@ -65,16 +95,12 @@
             margin-bottom: 6px;
         }
 
-        /* Custom Animations */
         @keyframes dropFilter {
             0% { transform: translateY(-30px) scale(1.05); opacity: 0; filter: brightness(2); }
             70% { transform: translateY(5px) scale(0.95); opacity: 1; filter: brightness(1); }
             100% { transform: translateY(0) scale(1); opacity: 1; filter: brightness(1); }
         }
-
-        .anim-drop {
-            animation: dropFilter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+        .anim-drop { animation: dropFilter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 
         @keyframes glitch {
             0% { transform: translate(0) }
@@ -86,61 +112,36 @@
         }
         .anim-glitch { animation: glitch 0.2s linear infinite; }
 
-        /* Range Slider Customization */
         input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-            height: 30px; /* Touch target size */
+            -webkit-appearance: none; width: 100%; background: transparent; height: 30px;
         }
         input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 28px;
-            width: 28px;
-            border-radius: 50%;
-            background: #10b981;
-            cursor: pointer;
-            margin-top: -10px;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6);
-            border: 2px solid #fff;
+            -webkit-appearance: none; height: 28px; width: 28px; border-radius: 50%;
+            background: #10b981; cursor: pointer; margin-top: -10px;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); border: 2px solid #fff;
         }
         input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 8px;
-            cursor: pointer;
-            background: #334155;
-            border-radius: 4px;
+            width: 100%; height: 8px; cursor: pointer; background: #334155; border-radius: 4px;
         }
 
         .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+            background: rgba(30, 41, 59, 0.6); backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 1rem; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
         }
 
-        /* Number Inputs */
         .ip-input {
-            width: 3.5rem;
-            background: transparent;
-            border-bottom: 2px solid #3b82f6;
-            text-align: center;
-            color: #93c5fd;
-            font-weight: bold;
-            font-size: 1.1rem;
+            width: 3.5rem; background: transparent; border-bottom: 2px solid #3b82f6;
+            text-align: center; color: #93c5fd; font-weight: bold; font-size: 1.1rem;
         }
         .ip-input:focus { outline: none; border-color: #60a5fa; background: rgba(59, 130, 246, 0.1); }
         
-        /* Hide arrows on number inputs */
         input[type="number"]::-webkit-inner-spin-button, 
         input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
     </style>
 </head>
 <body class="flex flex-col min-h-screen pb-10">
 
-<!-- Welcome / Start Screen -->
 <div id="start-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 px-4 text-center">
     <div class="mb-8 relative">
         <div class="absolute inset-0 bg-blue-500 blur-xl opacity-20 rounded-full anim-glitch"></div>
@@ -153,27 +154,17 @@
     <button id="btn-start" class="pixel-font bg-blue-600 hover:bg-blue-500 text-white py-4 px-8 rounded-xl text-lg shadow-[0_0_20px_rgba(59,130,246,0.6)] active:scale-95 transition-all border-b-4 border-blue-800">
         ¡START!
     </button>
-    <div class="mt-8 text-xs text-slate-500 flex items-center gap-2">
-        <span>Sube el volumen</span>
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5 10v4a2 2 0 002 2h2.28l3.153 3.153A1 1 0 0014 18.281V5.719a1 1 0 00-1.567-.811L9.28 8H7a2 2 0 00-2 2z"></path></svg>
-    </div>
 </div>
 
-<!-- Main App Container -->
 <main class="flex-grow p-3 sm:p-4 max-w-2xl mx-auto w-full flex flex-col gap-4 hidden" id="main-app">
     
-    <!-- Title Area -->
-    <header class="text-center py-2 relative">
-        <h2 class="text-lg sm:text-xl text-blue-400 pixel-font">Bitwise AND</h2>
-        <p class="text-xs text-slate-400 mt-2 bg-slate-800/50 inline-block px-3 py-1 rounded-full border border-slate-700">
-            <span class="text-emerald-400 font-bold">1 AND 1 = 1</span> | Cualquier otra cosa = <span class="text-red-400 font-bold">0</span>
-        </p>
+    <header class="text-center py-2 relative flex flex-col items-center">
+        <h2 class="text-lg sm:text-xl text-blue-400 pixel-font mb-2">Bitwise AND</h2>
+        <span id="badge-class" class="text-xs px-3 py-1 rounded-full border font-bold bg-yellow-900/40 text-yellow-400 border-yellow-700">Clase C</span>
     </header>
 
-    <!-- Controls Section (IP & CIDR) -->
     <section class="glass-card p-4 sm:p-5">
         <div class="flex flex-col gap-4">
-            <!-- IP Input -->
             <div class="flex justify-between items-center bg-slate-800/50 p-2 rounded-lg border border-slate-700/50">
                 <span class="text-xs sm:text-sm font-bold text-blue-400 uppercase tracking-wider">Dirección IP</span>
                 <div class="flex items-center gap-1 text-blue-300 font-bold">
@@ -184,270 +175,191 @@
                 </div>
             </div>
             
-            <!-- CIDR Slider -->
             <div class="bg-slate-800/50 p-3 rounded-lg border border-slate-700/50">
                 <div class="flex justify-between items-end mb-2">
                     <span class="text-xs sm:text-sm font-bold text-emerald-400 uppercase tracking-wider">Máscara (CIDR)</span>
                     <span class="text-2xl font-bold pixel-font text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]" id="display-cidr">/24</span>
                 </div>
                 <input type="range" id="slider-cidr" min="8" max="30" value="24" class="w-full mt-2">
-                <div class="flex justify-between text-[10px] sm:text-xs text-slate-500 mt-2 font-bold">
-                    <span>/8 (Grandes)</span>
-                    <span>/16</span>
-                    <span>/24 (LAN)</span>
-                    <span>/30 (Pto-Pto)</span>
-                </div>
             </div>
         </div>
     </section>
 
-    <!-- Interactive Visualizer -->
     <section class="glass-card p-3 sm:p-5 flex flex-col items-center overflow-hidden relative" id="visualizer-container">
-        
-        <!-- IP Binary Row -->
         <div class="w-full mb-2">
-            <div class="text-[10px] sm:text-xs text-blue-400 mb-1 font-bold text-center uppercase tracking-widest">IP en Binario</div>
+            <div class="text-[10px] sm:text-xs text-blue-400 mb-1 font-bold text-center uppercase tracking-widest">IP en Binario (Interruptores)</div>
             <div id="bin-ip" class="binary-row"></div>
         </div>
 
-        <!-- Mask Binary Row (The Filter) -->
         <div class="w-full mb-3 relative z-10">
             <div class="text-[10px] sm:text-xs text-emerald-400 mb-1 font-bold text-center uppercase tracking-widest flex items-center justify-center gap-2">
-                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
                 Filtro de Red
             </div>
             <div id="bin-mask" class="binary-row"></div>
         </div>
 
-        <!-- Operation Separator -->
         <div class="w-full h-px bg-slate-600/50 my-2 relative">
             <div class="absolute inset-0 flex justify-center items-center">
                 <span class="bg-slate-900 px-3 text-[10px] sm:text-xs font-bold text-slate-400 border border-slate-700 rounded-full">AND</span>
             </div>
         </div>
 
-        <!-- Result Binary Row -->
         <div class="w-full mt-2">
             <div class="text-[10px] sm:text-xs text-purple-400 mb-1 font-bold text-center uppercase tracking-widest">ID de Red (Binario)</div>
             <div id="bin-result" class="binary-row"></div>
         </div>
         
-        <!-- Action Button -->
         <button id="btn-animate" class="mt-5 pixel-font bg-purple-600 hover:bg-purple-500 text-white py-3 px-6 rounded-xl text-sm sm:text-base shadow-[0_0_15px_rgba(147,51,234,0.6)] active:scale-95 transition-all border-b-4 border-purple-800 flex items-center gap-2">
             FILTRAR
-            <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
         </button>
     </section>
 
-    <!-- Results and Mental Trick Section -->
     <section class="glass-card p-4 sm:p-5 hidden" id="results-section">
         
-        <!-- Data Grid -->
         <div class="grid grid-cols-2 gap-3 mb-5">
             <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
-                <div class="text-[10px] text-slate-400 uppercase">Máscara (Decimal)</div>
-                <div class="font-bold text-emerald-400 text-sm sm:text-base tracking-wider mt-1" id="res-mask"></div>
+                <div class="text-[10px] text-slate-400 uppercase">IP de Red (Network)</div>
+                <div class="font-bold text-purple-400 text-sm sm:text-base tracking-wider mt-1" id="res-net"></div>
             </div>
             <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
-                <div class="text-[10px] text-slate-400 uppercase">Red (Subnet ID)</div>
-                <div class="font-bold text-purple-400 text-sm sm:text-base tracking-wider mt-1" id="res-net"></div>
+                <div class="text-[10px] text-slate-400 uppercase">IP de Broadcast</div>
+                <div class="font-bold text-red-400 text-sm sm:text-base tracking-wider mt-1" id="res-broadcast"></div>
             </div>
         </div>
 
-        <!-- The Magic Trick Tutorial -->
         <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/30 p-4 rounded-xl relative overflow-hidden">
             <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-2 py-1 rounded-bl-lg uppercase">Truco Mental</div>
-            
             <h3 class="font-bold text-indigo-300 mb-3 text-sm flex items-center gap-2">
                 <span class="text-xl">🧙‍♂️</span> Calculando con el "Número Mágico"
             </h3>
-            
-            <div id="magic-trick-steps" class="space-y-3 text-xs sm:text-sm text-slate-300">
-                <!-- Dynamically populated via JS -->
-            </div>
+            <div id="magic-trick-steps" class="space-y-3 text-xs sm:text-sm text-slate-300"></div>
         </div>
         
-        <!-- Final Range Data -->
         <div class="mt-5 pt-4 border-t border-slate-700/50 bg-slate-900/30 p-3 rounded-lg">
-            <div class="flex justify-between items-center mb-2">
-                <div class="text-[10px] text-slate-400 uppercase">Rango Útil de Hosts:</div>
-                <div class="text-xs bg-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded border border-emerald-700"><span id="res-hosts" class="font-bold"></span> IPs</div>
+            <div class="grid grid-cols-2 gap-4 mb-3 text-center border-b border-slate-700/50 pb-3">
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase">Hosts por Subred:</div>
+                    <div class="text-emerald-400 font-bold text-lg" id="res-hosts"></div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-slate-400 uppercase">Subredes Creadas:</div>
+                    <div class="text-blue-400 font-bold text-lg" id="res-subnets"></div>
+                </div>
             </div>
+            <div class="text-[10px] text-slate-400 uppercase mb-1">Rango Útil (Dispositivos):</div>
             <div class="font-bold text-blue-300 text-sm sm:text-base text-center py-2 bg-blue-900/20 rounded border border-blue-800/50" id="res-range"></div>
-            
-            <div class="flex justify-between items-center mt-3 text-xs">
-                <span class="text-slate-400">Dirección Broadcast:</span>
-                <span class="text-red-400 font-bold bg-red-900/30 px-2 py-1 rounded" id="res-broadcast"></span>
-            </div>
         </div>
     </section>
-
 </main>
 
 <script>
-    // --- 1. Audio System (Tone.js 8-bit Synthesizers) ---
-    let synth, dropSynth, successSynth, errorSynth;
+    let synth, dropSynth, successSynth;
     let audioInitialized = false;
 
     async function initAudio() {
         if (audioInitialized) return;
-        
         await Tone.start();
-        
-        // UI Click Tick
-        synth = new Tone.Synth({
-            oscillator: { type: 'square' },
-            envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 }
-        }).toDestination();
+        synth = new Tone.Synth({ oscillator: { type: 'square' }, envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
         synth.volume.value = -15;
-
-        // Filter Drop Sound (Arpeggio downwards)
-        dropSynth = new Tone.FMSynth({
-            harmonicity: 1.5, modulationIndex: 5,
-            oscillator: { type: "square" },
-            envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.2 },
-            modulation: { type: "square" },
-        }).toDestination();
+        dropSynth = new Tone.FMSynth({ harmonicity: 1.5, modulationIndex: 5, oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0.1, release: 0.2 }, modulation: { type: "square" } }).toDestination();
         dropSynth.volume.value = -12;
-
-        // Success / Magic sound (Arpeggio upwards)
-        successSynth = new Tone.PolySynth(Tone.Synth, {
-            oscillator: { type: 'triangle' },
-            envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.5 }
-        }).toDestination();
+        successSynth = new Tone.PolySynth(Tone.Synth, { oscillator: { type: 'triangle' }, envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.5 } }).toDestination();
         successSynth.volume.value = -10;
-
-        // Error / Block sound
-        errorSynth = new Tone.MembraneSynth({
-            pitchDecay: 0.05,
-            octaves: 10,
-            oscillator: { type: 'sawtooth' },
-            envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 1.4 }
-        }).toDestination();
-        errorSynth.volume.value = -10;
-
         audioInitialized = true;
     }
 
-    // Sound Helpers
     function playTick() { if(audioInitialized) synth.triggerAttackRelease("C5", "32n"); }
     function playBlip() { if(audioInitialized) synth.triggerAttackRelease("G5", "32n"); }
-    
-    function playFilterAnimation() { 
-        if(!audioInitialized) return;
-        const now = Tone.now();
-        // Sweep down to simulate mask dropping
-        dropSynth.triggerAttackRelease("C5", "16n", now);
-        dropSynth.triggerAttackRelease("G4", "16n", now + 0.1);
-        dropSynth.triggerAttackRelease("C4", "8n", now + 0.2);
-    }
-    
-    function playResultMagic() {
-        if(!audioInitialized) return;
-        const now = Tone.now();
-        // Bright chord for result
-        successSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", now);
-    }
+    function playFilterAnimation() { if(audioInitialized) { const now = Tone.now(); dropSynth.triggerAttackRelease("C5", "16n", now); dropSynth.triggerAttackRelease("G4", "16n", now + 0.1); dropSynth.triggerAttackRelease("C4", "8n", now + 0.2); } }
+    function playResultMagic() { if(audioInitialized) successSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", Tone.now()); }
 
-    function playBlockSound() {
-        if(audioInitialized) errorSynth.triggerAttackRelease("G2", "8n");
-    }
+    let state = { ip: [192, 168, 1, 100], cidr: 24, isFiltered: false };
 
-    // --- 2. Application State & Networking Logic ---
-    let state = {
-        ip: [192, 168, 1, 100],
-        cidr: 24,
-        isFiltered: false
-    };
+    function dec2bin(dec) { return (dec >>> 0).toString(2).padStart(8, '0'); }
 
-    // Helper: Decimal to 8-bit binary string
-    function dec2bin(dec) {
-        return (dec >>> 0).toString(2).padStart(8, '0');
-    }
-
-    // Helper: Generate mask array [255, 255, 255, 0] from CIDR
     function getMaskFromCidr(cidr) {
-        let mask = [];
-        let c = cidr;
+        let mask = [], c = cidr;
         for (let i = 0; i < 4; i++) {
             if (c >= 8) { mask.push(255); c -= 8; }
             else if (c > 0) {
                 let val = 0;
                 for(let j=0; j<c; j++) val += Math.pow(2, 7-j);
-                mask.push(val);
-                c = 0;
+                mask.push(val); c = 0;
             } else { mask.push(0); }
         }
         return mask;
     }
 
-    // Core Logic: Calculate all network parameters
+    function getNetworkClass(ip) {
+        const first = ip[0];
+        if (first <= 127) return { name: 'Clase A', defaultCidr: 8, color: 'text-green-400 border-green-700 bg-green-900/40' };
+        if (first <= 191) return { name: 'Clase B', defaultCidr: 16, color: 'text-blue-400 border-blue-700 bg-blue-900/40' };
+        if (first <= 223) return { name: 'Clase C', defaultCidr: 24, color: 'text-yellow-400 border-yellow-700 bg-yellow-900/40' };
+        if (first <= 239) return { name: 'Clase D (Multicast)', defaultCidr: 32, color: 'text-purple-400 border-purple-700 bg-purple-900/40' };
+        return { name: 'Clase E', defaultCidr: 32, color: 'text-red-400 border-red-700 bg-red-900/40' };
+    }
+
     function calculateNetwork() {
         const mask = getMaskFromCidr(state.cidr);
-        
-        // Bitwise AND for Network ID
         const netId = state.ip.map((val, idx) => val & mask[idx]);
-        
-        // Invert mask and Bitwise OR for Broadcast
         const invertedMask = mask.map(val => ~val & 255);
         const broadcast = netId.map((val, idx) => val | invertedMask[idx]);
         
-        // Total usable hosts: (2 ^ host_bits) - 2
-        const hostBits = 32 - state.cidr;
-        let hosts = Math.pow(2, hostBits) - 2;
+        let hosts = Math.pow(2, 32 - state.cidr) - 2;
         if (state.cidr === 32) hosts = 0;
-        if (state.cidr === 31) hosts = 2; // Point-to-point exception RFC 3021
+        if (state.cidr === 31) hosts = 2; 
 
-        return { mask, netId, broadcast, hosts };
+        const netClass = getNetworkClass(state.ip);
+        // Calcula subredes basado en los bits tomados prestados de la clase original
+        let borrowedBits = state.cidr - netClass.defaultCidr;
+        let subnets = borrowedBits >= 0 ? Math.pow(2, borrowedBits) : "N/A (Supernetting)";
+
+        return { mask, netId, broadcast, hosts, subnets, netClass };
     }
 
-    // --- 3. DOM Elements ---
     const els = {
-        btnStart: document.getElementById('btn-start'),
-        screenStart: document.getElementById('start-screen'),
-        mainApp: document.getElementById('main-app'),
-        sliderCidr: document.getElementById('slider-cidr'),
-        displayCidr: document.getElementById('display-cidr'),
-        binIp: document.getElementById('bin-ip'),
-        binMask: document.getElementById('bin-mask'),
-        binResult: document.getElementById('bin-result'),
-        btnAnimate: document.getElementById('btn-animate'),
-        resultsSection: document.getElementById('results-section'),
-        resMask: document.getElementById('res-mask'),
-        resNet: document.getElementById('res-net'),
-        resRange: document.getElementById('res-range'),
-        resBroadcast: document.getElementById('res-broadcast'),
-        resHosts: document.getElementById('res-hosts'),
+        btnStart: document.getElementById('btn-start'), screenStart: document.getElementById('start-screen'),
+        mainApp: document.getElementById('main-app'), sliderCidr: document.getElementById('slider-cidr'),
+        displayCidr: document.getElementById('display-cidr'), binIp: document.getElementById('bin-ip'),
+        binMask: document.getElementById('bin-mask'), binResult: document.getElementById('bin-result'),
+        btnAnimate: document.getElementById('btn-animate'), resultsSection: document.getElementById('results-section'),
+        resNet: document.getElementById('res-net'), resRange: document.getElementById('res-range'),
+        resBroadcast: document.getElementById('res-broadcast'), resHosts: document.getElementById('res-hosts'),
+        resSubnets: document.getElementById('res-subnets'), badgeClass: document.getElementById('badge-class'),
         magicSteps: document.getElementById('magic-trick-steps'),
-        ipInputs: [
-            document.getElementById('ip-oct-0'),
-            document.getElementById('ip-oct-1'),
-            document.getElementById('ip-oct-2'),
-            document.getElementById('ip-oct-3')
-        ]
+        ipInputs: [ document.getElementById('ip-oct-0'), document.getElementById('ip-oct-1'), document.getElementById('ip-oct-2'), document.getElementById('ip-oct-3') ]
     };
 
-    // --- 4. Rendering Logic ---
-
-    // Renders the binary blocks for a given octet array
     function renderBinaryDisplay(container, octets, type) {
         container.innerHTML = '';
         let globalBitIndex = 0;
         
         octets.forEach((octet, octetIdx) => {
             const binStr = dec2bin(octet);
+            const wrapper = document.createElement('div');
+            wrapper.className = 'octet-wrapper';
+
+            // Add the 128 64 32... headers ONLY for the IP section
+            if (type === 'ip') {
+                const headerRow = document.createElement('div');
+                headerRow.className = 'bit-headers';
+                ['128','64','32','16','8','4','2','1'].forEach(num => {
+                    const span = document.createElement('span');
+                    span.innerText = num;
+                    headerRow.appendChild(span);
+                });
+                wrapper.appendChild(headerRow);
+            }
+
             const group = document.createElement('div');
             group.className = 'octet-group';
             
             for (let i = 0; i < 8; i++) {
                 const bitValue = binStr[i];
                 const box = document.createElement('div');
-                box.dataset.bitIndex = globalBitIndex;
-                box.dataset.octetIndex = octetIdx;
                 
-                // Base styling based on row type
                 if (type === 'ip') {
-                    box.className = 'bit-box bit-ip';
+                    box.className = `bit-box ${bitValue === '1' ? 'switch-on' : 'switch-off'}`;
                     box.innerText = bitValue;
                 } 
                 else if (type === 'mask') {
@@ -456,11 +368,8 @@
                 } 
                 else if (type === 'result') {
                     if (!state.isFiltered) {
-                        // Pre-animation state
-                        box.className = 'bit-box bit-unknown';
-                        box.innerText = '?';
+                        box.className = 'bit-box bit-unknown'; box.innerText = '?';
                     } else {
-                        // Post-animation state
                         const isNetBit = globalBitIndex < state.cidr;
                         box.className = `bit-box ${isNetBit ? 'bit-result-net' : 'bit-result-host'}`;
                         box.innerText = bitValue;
@@ -470,39 +379,29 @@
                 group.appendChild(box);
                 globalBitIndex++;
             }
-            container.appendChild(group);
+            wrapper.appendChild(group);
+            container.appendChild(wrapper);
         });
     }
 
-    // Generates the plain-text explanation of how to calculate it mentally
     function renderMentalTrick(info) {
-        // Find the "interesting" octet (the one that is not 255 or 0)
         let interestingIdx = -1;
         for(let i=0; i<4; i++) {
-            if(info.mask[i] >= 0 && info.mask[i] < 255) {
-                interestingIdx = i;
-                break;
-            }
+            if(info.mask[i] >= 0 && info.mask[i] < 255) { interestingIdx = i; break; }
         }
 
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
-        
         if (interestingIdx === -1 || state.cidr === 32) {
-            els.magicSteps.innerHTML = `<div class="bg-blue-900/30 p-2 rounded border border-blue-500/30">Mascara /32 o completa. No hay cálculo de bloques de host, es una IP única o ruta específica.</div>`;
+            els.magicSteps.innerHTML = `<div class="bg-blue-900/30 p-2 rounded border border-blue-500/30">Mascara /32 o completa. Ruta de host único.</div>`;
             return;
         }
 
         const maskVal = info.mask[interestingIdx];
         const ipVal = state.ip[interestingIdx];
-        
-        // The core mental math trick
         const magicNum = 256 - maskVal;
         
-        // Find base subnet by finding multiple of magicNum <= ipVal
         let baseNet = 0;
-        while ((baseNet + magicNum) <= ipVal) {
-            baseNet += magicNum;
-        }
+        while ((baseNet + magicNum) <= ipVal) { baseNet += magicNum; }
         let nextNet = baseNet + magicNum;
         let bcastVal = nextNet - 1;
 
@@ -529,97 +428,74 @@
         `;
     }
 
-    // Update entire UI based on current state
     function refreshUI() {
         const info = calculateNetwork();
         
         els.displayCidr.innerText = `/${state.cidr}`;
+        els.badgeClass.innerText = info.netClass.name;
+        els.badgeClass.className = `text-xs px-3 py-1 rounded-full border font-bold ${info.netClass.color}`;
         
-        // Render Binaries
         renderBinaryDisplay(els.binIp, state.ip, 'ip');
         renderBinaryDisplay(els.binMask, info.mask, 'mask');
         renderBinaryDisplay(els.binResult, info.netId, 'result');
 
-        // Only show results if animation has happened
         if (state.isFiltered) {
             els.resultsSection.classList.remove('hidden');
-            
-            els.resMask.innerText = info.mask.join('.');
             els.resNet.innerText = info.netId.join('.');
             els.resBroadcast.innerText = info.broadcast.join('.');
-            els.resHosts.innerText = info.hosts.toLocaleString();
+            els.resHosts.innerText = typeof info.hosts === 'number' ? info.hosts.toLocaleString() : info.hosts;
+            els.resSubnets.innerText = typeof info.subnets === 'number' ? info.subnets.toLocaleString() : info.subnets;
             
             if (info.hosts > 0 || state.cidr === 31) {
                 let first = [...info.netId]; first[3]++;
                 let last = [...info.broadcast]; last[3]--;
                 els.resRange.innerText = `${first.join('.')} - ${last.join('.')}`;
             } else {
-                els.resRange.innerText = "N/A (Host Único)";
+                els.resRange.innerText = "N/A (Host Único / Red entera)";
             }
-
             renderMentalTrick(info);
         } else {
             els.resultsSection.classList.add('hidden');
         }
     }
 
-    // The core visual animation sequence
     function executeFilterAnimation() {
         if (!audioInitialized) initAudio();
-        
-        // Reset state
-        state.isFiltered = false;
-        refreshUI();
+        state.isFiltered = false; refreshUI();
         els.btnAnimate.disabled = true;
-        els.btnAnimate.innerHTML = '<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Filtrando...';
+        els.btnAnimate.innerHTML = 'Filtrando...';
 
         playFilterAnimation();
 
-        // 1. Drop the mask down
         const maskBoxes = els.binMask.querySelectorAll('.bit-box');
         maskBoxes.forEach((box, i) => {
-            box.style.animation = 'none';
-            void box.offsetWidth; // trigger reflow
+            box.style.animation = 'none'; void box.offsetWidth;
             box.style.animation = `dropFilter 0.4s ease-out forwards`;
             box.style.animationDelay = `${i * 10}ms`;
         });
 
-        // 2. Reveal results progressively
         setTimeout(() => {
-            state.isFiltered = true;
-            refreshUI(); // Draw actual results
+            state.isFiltered = true; refreshUI(); playResultMagic();
             
-            playResultMagic();
-
-            // 3. Highlight the result bits
             const resultBoxes = els.binResult.querySelectorAll('.bit-box');
             resultBoxes.forEach((box, i) => {
-                box.style.transform = 'scale(0.5)';
-                box.style.opacity = '0';
-                
+                box.style.transform = 'scale(0.5)'; box.style.opacity = '0';
                 setTimeout(() => {
                     box.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-                    box.style.transform = 'scale(1)';
-                    box.style.opacity = '1';
-                    
-                    // Make host bits look like they were "blocked"
+                    box.style.transform = 'scale(1)'; box.style.opacity = '1';
                     if (i >= state.cidr) {
-                        box.style.backgroundColor = '#ef4444'; // Flash red
+                        box.style.backgroundColor = '#ef4444';
                         setTimeout(() => box.style.backgroundColor = '', 200);
                     }
-                }, i * 15); // Ripple effect
+                }, i * 15);
             });
 
-            // Restore button
             setTimeout(() => {
                 els.btnAnimate.disabled = false;
-                els.btnAnimate.innerHTML = `NUEVO FILTRO <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>`;
+                els.btnAnimate.innerHTML = `NUEVO FILTRO`;
             }, 600);
-
-        }, 500); // Wait for drop animation
+        }, 500);
     }
-
-    // --- 5. Event Listeners ---
 
     els.btnStart.addEventListener('click', async () => {
         await initAudio();
@@ -627,49 +503,32 @@
         setTimeout(() => {
             els.screenStart.style.display = 'none';
             els.mainApp.classList.remove('hidden');
-            // Slight fade in
             els.mainApp.style.animation = 'dropFilter 0.5s ease-out forwards';
             refreshUI();
         }, 300);
     });
 
     els.sliderCidr.addEventListener('input', (e) => {
-        state.cidr = parseInt(e.target.value);
-        state.isFiltered = false; // Reset view
-        playTick();
-        refreshUI();
+        state.cidr = parseInt(e.target.value); state.isFiltered = false;
+        playTick(); refreshUI();
     });
 
     els.btnAnimate.addEventListener('click', () => {
         if(state.isFiltered) {
-            // If already filtered, reset it first
-            state.isFiltered = false;
-            playBlip();
-            refreshUI();
-            els.btnAnimate.innerHTML = `FILTRAR <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>`;
-        } else {
-            executeFilterAnimation();
-        }
+            state.isFiltered = false; playBlip(); refreshUI();
+            els.btnAnimate.innerHTML = `FILTRAR`;
+        } else { executeFilterAnimation(); }
     });
 
-    // Handle IP Inputs
     els.ipInputs.forEach((input, index) => {
         input.addEventListener('change', (e) => {
             let val = parseInt(e.target.value);
-            if (isNaN(val) || val < 0) val = 0;
-            if (val > 255) val = 255;
-            e.target.value = val;
-            
-            state.ip[index] = val;
-            state.isFiltered = false;
-            playBlip();
-            refreshUI();
+            if (isNaN(val) || val < 0) val = 0; if (val > 255) val = 255;
+            e.target.value = val; state.ip[index] = val; state.isFiltered = false;
+            playBlip(); refreshUI();
         });
-        
-        // Select all text on click for easy mobile entry
         input.addEventListener('focus', function() { this.select(); });
     });
-
 </script>
 </body>
 </html>
