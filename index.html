@@ -26,9 +26,7 @@
             user-select: none; position: relative;
         }
         
-        @media (min-width: 640px) {
-            .bit-box { width: 24px; height: 32px; font-size: 0.9rem; margin: 2px;}
-        }
+        @media (min-width: 640px) { .bit-box { width: 24px; height: 32px; font-size: 0.9rem; margin: 2px;} }
 
         /* Switches interactivos */
         .switch-on {
@@ -62,6 +60,8 @@
             100% { transform: translateY(0) scale(1); opacity: 1; filter: brightness(1); }
         }
         .anim-drop { animation: dropFilter 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .anim-pulse-glow { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow { 0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); } 50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); } 100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.5); } }
 
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; height: 30px; }
         input[type=range]::-webkit-slider-thumb {
@@ -124,7 +124,16 @@
                     <span class="text-xs sm:text-sm font-bold text-emerald-400 uppercase tracking-wider">Máscara (CIDR)</span>
                     <span class="text-2xl font-bold pixel-font text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.8)]" id="display-cidr">/24</span>
                 </div>
-                <input type="range" id="slider-cidr" min="8" max="30" value="24" class="w-full mt-2">
+                <input type="range" id="slider-cidr" min="8" max="32" value="24" class="w-full mt-2">
+                
+                <!-- DYNAMIC CIDR CONTEXT -->
+                <div id="cidr-context" class="mt-3 flex items-start gap-2 bg-slate-900/40 p-2 rounded border border-slate-700">
+                    <div id="cidr-icon" class="text-xl">🏠</div>
+                    <div>
+                        <div id="cidr-desc" class="text-xs sm:text-sm text-slate-300 font-bold">Estándar LAN (Casas, Oficinas pequeñas).</div>
+                        <div id="cidr-class" class="text-[10px] text-slate-500 uppercase">Típicamente Clase C</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -132,7 +141,7 @@
     <section class="glass-card p-3 sm:p-5 flex flex-col items-center overflow-hidden relative" id="visualizer-container">
         <div class="w-full mb-2">
             <div class="text-[10px] sm:text-xs text-blue-400 mb-1 font-bold text-center uppercase tracking-widest flex items-center justify-center gap-2">
-                IP en Binario <span class="text-[8px] bg-blue-900/50 px-2 py-0.5 rounded border border-blue-700">¡Clickeable!</span>
+                IP en Binario <span class="text-[8px] bg-blue-900/50 px-2 py-0.5 rounded border border-blue-700 anim-pulse-glow">¡Toca los bits!</span>
             </div>
             <div id="bin-ip" class="binary-row"></div>
         </div>
@@ -159,7 +168,6 @@
     </section>
 
     <section class="glass-card p-4 sm:p-5 hidden" id="results-section">
-        
         <div class="grid grid-cols-2 gap-3 mb-5 text-center">
             <div class="bg-slate-800/80 p-3 rounded-lg border border-slate-700">
                 <div class="text-[10px] text-slate-400 uppercase">IP de Red</div>
@@ -180,7 +188,32 @@
         </div>
         
         <div class="mt-5 pt-4 border-t border-slate-700/50" id="subnet-list-container">
-            <!-- La lista dinámica de subredes se inyectará aquí -->
+            <!-- Dinámico -->
+        </div>
+
+        <!-- NEW: NAT EXPLANATION -->
+        <div class="mt-6 bg-gradient-to-br from-blue-900/50 to-slate-900/80 border-2 border-blue-500/50 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-blue-400 transition-colors cursor-help" onclick="playSwitchTick()">
+            <div class="absolute -right-4 -top-4 opacity-10 text-8xl group-hover:opacity-20 transition-opacity">🌐</div>
+            <h3 class="font-bold text-blue-300 mb-3 text-sm sm:text-base flex items-center gap-2 relative z-10">
+                ¿Para qué sirve el AND en la vida real? (Decisión LAN vs WAN)
+            </h3>
+            <div class="text-xs sm:text-sm text-slate-300 space-y-3 relative z-10">
+                <p>El <strong>Bitwise AND</strong> no solo crea subredes. ¡Es la brújula de tu PC! Cuando intentas enviar un mensaje a otra IP, tu dispositivo hace esto en microsegundos:</p>
+                <div class="bg-slate-950/80 p-3 rounded border border-slate-700 font-mono text-[10px] sm:text-xs space-y-2">
+                    <div>1. AND( <span class="text-blue-400">Tu IP</span>, <span class="text-emerald-400">Máscara</span> ) = <span class="text-purple-400">Tu ID de Red</span></div>
+                    <div>2. AND( <span class="text-orange-400">IP Destino</span>, <span class="text-emerald-400">Máscara</span> ) = <span class="text-purple-400">ID de Red Destino</span></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <div class="bg-green-900/30 border border-green-700/50 p-3 rounded">
+                        <div class="text-green-400 font-bold mb-1">🏠 Si son Iguales (LAN)</div>
+                        <p class="text-[11px]">Sabe que el dispositivo está en tu misma red. Se comunican directo a través del Switch usando direcciones MAC (ARP).</p>
+                    </div>
+                    <div class="bg-orange-900/30 border border-orange-700/50 p-3 rounded">
+                        <div class="text-orange-400 font-bold mb-1">🌍 Si son Diferentes (WAN)</div>
+                        <p class="text-[11px]">Sabe que está en Internet (o en otra red). Envía el paquete a tu Router (Puerta de enlace) para que haga <strong>NAT</strong> y lo saque al mundo exterior.</p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 </main>
@@ -206,7 +239,10 @@
 
     let state = { ip: [192, 168, 1, 100], cidr: 24, isFiltered: false };
 
+    // --- Helpers Numéricos ---
     function dec2bin(dec) { return (dec >>> 0).toString(2).padStart(8, '0'); }
+    function ipToInt(ipArr) { return (ipArr[0] << 24 | ipArr[1] << 16 | ipArr[2] << 8 | ipArr[3]) >>> 0; }
+    function intToIp(int) { return [ (int >>> 24) & 255, (int >>> 16) & 255, (int >>> 8) & 255, int & 255 ]; }
 
     function getMaskFromCidr(cidr) {
         let mask = [], c = cidr;
@@ -227,6 +263,17 @@
         if (first <= 191) return { name: 'Clase B', defaultCidr: 16, color: 'text-blue-400 border-blue-700 bg-blue-900/40' };
         if (first <= 223) return { name: 'Clase C', defaultCidr: 24, color: 'text-yellow-400 border-yellow-700 bg-yellow-900/40' };
         return { name: 'Clase D/E', defaultCidr: 32, color: 'text-purple-400 border-purple-700 bg-purple-900/40' };
+    }
+
+    function getCidrContext(cidr) {
+        if(cidr >= 8 && cidr <= 15) return { text: "Redes Inmensas (ISPs, Multinacionales).", class: "Típicamente Clase A", icon: "🏢🌍" };
+        if(cidr >= 16 && cidr <= 23) return { text: "Redes Medianas (Universidades, Corporativos).", class: "Típicamente Clase B", icon: "🏫🏢" };
+        if(cidr === 24) return { text: "Estándar LAN (Casas, Oficinas pequeñas).", class: "Típicamente Clase C", icon: "🏠💻" };
+        if(cidr >= 25 && cidr <= 29) return { text: "Subredes departamentales (VLANs específicas).", class: "Subnetting", icon: "🖥️🔌" };
+        if(cidr === 30) return { text: "Enlaces Punto a Punto (Entre routers).", class: "Subnetting", icon: "🔗" };
+        if(cidr === 31) return { text: "Enlaces Punto a Punto (RFC 3021, sin broadcast).", class: "Subnetting Especial", icon: "⚡" };
+        if(cidr === 32) return { text: "Host único (Loopback, Rutas específicas).", class: "Host Route", icon: "🎯" };
+        return { text: "Prefijo inusual/reservado", class: "Especial", icon: "❓" };
     }
 
     function calculateNetwork() {
@@ -250,6 +297,7 @@
         resNet: document.getElementById('res-net'), resBroadcast: document.getElementById('res-broadcast'),
         badgeClass: document.getElementById('badge-class'), magicSteps: document.getElementById('magic-trick-steps'),
         subnetContainer: document.getElementById('subnet-list-container'),
+        cidrDesc: document.getElementById('cidr-desc'), cidrClass: document.getElementById('cidr-class'), cidrIcon: document.getElementById('cidr-icon'),
         ipInputs: [ document.getElementById('ip-oct-0'), document.getElementById('ip-oct-1'), document.getElementById('ip-oct-2'), document.getElementById('ip-oct-3') ]
     };
 
@@ -290,30 +338,23 @@
                         state.isFiltered = false; playSwitchTick(); refreshUI();
                     };
                 } 
-                else if (type === 'mask') {
-                    box.className = `bit-box ${bitValue === '1' ? 'bit-mask-1' : 'bit-mask-0'}`;
-                    box.innerText = bitValue;
-                } 
+                else if (type === 'mask') { box.className = `bit-box ${bitValue === '1' ? 'bit-mask-1' : 'bit-mask-0'}`; box.innerText = bitValue; } 
                 else if (type === 'result') {
-                    if (!state.isFiltered) {
-                        box.className = 'bit-box bit-unknown'; box.innerText = '?';
-                    } else {
+                    if (!state.isFiltered) { box.className = 'bit-box bit-unknown'; box.innerText = '?'; } 
+                    else {
                         const isNetBit = globalBitIndex < state.cidr;
                         box.className = `bit-box ${isNetBit ? 'bit-result-net' : 'bit-result-host'}`;
                         box.innerText = bitValue;
                     }
                 }
-                group.appendChild(box);
-                globalBitIndex++;
+                group.appendChild(box); globalBitIndex++;
             }
             wrapper.appendChild(group); container.appendChild(wrapper);
         });
     }
 
     function renderSubnetList(info, interestingIdx, magicNum) {
-        if(interestingIdx === -1) {
-            els.subnetContainer.innerHTML = ''; return;
-        }
+        if(interestingIdx === -1) { els.subnetContainer.innerHTML = ''; return; }
 
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
         let baseIp = [...info.netId];
@@ -324,7 +365,6 @@
         let usefulIps = totalIps - 2;
 
         let rightOctetsExplanation = "";
-        // Si el octeto interesante NO es el cuarto, explicamos qué pasa con los que están a su derecha.
         if (interestingIdx < 3) {
             rightOctetsExplanation = `
                 <div class="mt-4 bg-indigo-900/30 p-3 sm:p-4 rounded-lg border border-indigo-500/40 text-xs sm:text-sm text-indigo-100 shadow-inner">
@@ -332,12 +372,11 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         ¿Por qué el último octeto es 0 o 255? ¿Se pueden usar?
                     </h4>
-                    <p class="mb-2">Como el corte de tu red (la máscara) cae en el <strong>${ordinal[interestingIdx].toLowerCase()} octeto</strong>, todos los octetos a su derecha son exclusivamente <strong>espacio para dispositivos (bits de host)</strong>.</p>
+                    <p class="mb-2">Como el corte de tu red cae en el <strong>${ordinal[interestingIdx].toLowerCase()} octeto</strong>, todos los octetos a su derecha son exclusivamente <strong>espacio para dispositivos (bits de host)</strong>.</p>
                     <ul class="list-disc pl-4 space-y-1 text-indigo-200 mb-2">
                         <li><strong>ID de Red:</strong> Matématicamente, TODOS los bits de host se apagan a la vez (por eso ves <code class="text-indigo-400">.0</code>).</li>
                         <li><strong>Broadcast:</strong> TODOS los bits de host se encienden a la vez (por eso ves <code class="text-indigo-400">.255</code>).</li>
                     </ul>
-                    <p class="font-medium text-emerald-300">¡Sí se pueden usar los números de en medio! Las IPs útiles iteran por <em>todas</em> las combinaciones posibles (del .1 al .254) creando todo ese gran bloque de IPs por cada subred.</p>
                 </div>
             `;
         }
@@ -351,12 +390,11 @@
                 
                 <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/80 shadow-md">
                     <p class="text-slate-200 mb-3 text-sm">El <strong class="text-yellow-400 text-base">${ordinal[interestingIdx]} octeto</strong> avanza sumando <span class="highlight-octet text-base">+${magicNum}</span>.</p>
-                    
                     <div class="bg-slate-800/80 p-3 rounded border border-slate-600/50">
                         <p class="text-sm sm:text-base text-emerald-400 font-bold mb-1">Fórmula de IPs: 2<sup>${hostBits}</sup> = <span class="text-emerald-300">${totalIps}</span></p>
                         <p class="text-sm sm:text-base text-emerald-400 font-bold">IPs Útiles: ${totalIps} - 2 = <span class="text-white bg-emerald-700/50 px-2 py-0.5 rounded">${usefulIps}</span> por subred.</p>
                         <p class="text-[11px] sm:text-xs text-slate-400 mt-2 font-normal italic border-t border-slate-700 pt-2">
-                            ¿Por qué restamos -2? Porque la primera IP (puros ceros en host) se reserva para identificar la Red, y la última (puros unos en host) es para el Broadcast. ¡No se pueden asignar a tu PC o celular!
+                            ¿Por qué restamos -2? Porque la primera IP se reserva para la Red, y la última para el Broadcast. ¡No se pueden asignar a dispositivos!
                         </p>
                     </div>
                 </div>
@@ -385,18 +423,41 @@
             let last = [...bcast]; last[3]--;
 
             const hl = (arr) => arr.map((v, i) => i === interestingIdx ? `<span class="highlight-octet">${v}</span>` : v).join('.');
+            const isUserSubnet = state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal;
 
             html += `
-                <div class="bg-slate-800/60 p-3 rounded-lg border ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? 'border-purple-500 bg-purple-900/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'border-slate-700'} text-xs sm:text-sm transition-all">
+                <div class="bg-slate-800/60 p-3 rounded-lg border ${isUserSubnet ? 'border-purple-500 bg-purple-900/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'border-slate-700'} text-xs sm:text-sm transition-all">
                     <div class="font-bold text-blue-300 mb-2 flex justify-between items-center border-b border-slate-700/50 pb-1">
                         <span class="text-base">Subred #${idx + 1}</span>
-                        ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? '<span class="text-[9px] bg-purple-600 text-white px-2 py-1 rounded shadow uppercase tracking-wider font-bold">Tu IP está aquí</span>' : ''}
+                        ${isUserSubnet ? '<span class="text-[9px] bg-purple-600 text-white px-2 py-1 rounded shadow uppercase tracking-wider font-bold">Tu IP está aquí</span>' : ''}
                     </div>
                     <div class="flex justify-between mb-1"><span class="text-slate-400">ID Red:</span> <span class="font-mono text-purple-300">${hl(net)}</span></div>
-                    <div class="flex justify-between mb-1"><span class="text-slate-400">IPs Útiles:</span> <span class="font-mono text-emerald-300">${hl(first)} - ${hl(last)}</span></div>
                     <div class="flex justify-between"><span class="text-slate-400">Broadcast:</span> <span class="font-mono text-red-300">${hl(bcast)}</span></div>
-                </div>
             `;
+
+            // NEW: 3 Examples of useful IPs for the highlighted subnet
+            if (isUserSubnet && usefulIps > 2) {
+                let firstInt = ipToInt(first);
+                let middleInt = firstInt + Math.floor(usefulIps / 2); // IP de en medio
+                let lastInt = ipToInt(last);
+
+                html += `
+                    <div class="mt-3 bg-slate-900/80 p-2 rounded border border-slate-700">
+                        <div class="text-[10px] text-emerald-400 font-bold mb-1 uppercase tracking-wider">Ejemplos de cómo varían las ${usefulIps} IPs útiles:</div>
+                        <ul class="text-[11px] font-mono text-emerald-200 space-y-1">
+                            <li class="flex justify-between"><span>Primera IP:</span> <span>${intToIp(firstInt).join('.')}</span></li>
+                            <li class="flex justify-between text-slate-400 text-[10px]"><span>... iterando combinaciones ...</span></li>
+                            <li class="flex justify-between"><span>IP Intermedia:</span> <span>${intToIp(middleInt).join('.')}</span></li>
+                            <li class="flex justify-between text-slate-400 text-[10px]"><span>... iterando combinaciones ...</span></li>
+                            <li class="flex justify-between"><span>Última IP:</span> <span>${intToIp(lastInt).join('.')}</span></li>
+                        </ul>
+                    </div>
+                `;
+            } else if (isUserSubnet) {
+                html += `<div class="mt-2 text-[10px] text-emerald-400">Rango útil: ${hl(first)} - ${hl(last)}</div>`;
+            }
+
+            html += `</div>`;
         });
         html += `</div>`;
         els.subnetContainer.innerHTML = html;
@@ -404,10 +465,7 @@
 
     function renderMentalTrick(info) {
         let interestingIdx = -1;
-        for(let i=0; i<4; i++) {
-            if(info.mask[i] >= 0 && info.mask[i] < 255) { interestingIdx = i; break; }
-        }
-        
+        for(let i=0; i<4; i++) { if(info.mask[i] >= 0 && info.mask[i] < 255) { interestingIdx = i; break; } }
         if (state.cidr % 8 === 0 && state.cidr < 32) { interestingIdx = (state.cidr / 8); }
 
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
@@ -424,22 +482,26 @@
         let sumHTML = `<div class="flex flex-wrap gap-1 mt-2 items-center bg-slate-900/50 p-2 rounded border border-slate-700/50">`;
         let added = [];
         bitVals.forEach(val => {
-            let isOn = (maskVal & val) !== 0;
-            if(isOn) added.push(val);
+            let isOn = (maskVal & val) !== 0; if(isOn) added.push(val);
             let style = isOn ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-slate-800 text-slate-500 border-slate-700 opacity-50';
             sumHTML += `<div class="text-[10px] px-1.5 py-0.5 rounded border ${style}">${val}</div>`;
         });
         sumHTML += `<div class="w-full mt-2 font-bold text-emerald-400 text-xs sm:text-sm text-center border-t border-slate-700 pt-2">= ${added.join(' + ')} = <span class="text-lg">${maskVal}</span></div></div>`;
         
-        let baseNet = 0; while ((baseNet + magicNum) <= ipVal) { baseNet += magicNum; }
-        let nextNet = baseNet + magicNum;
+        let baseNet = 0; 
+        let multiSequence = [];
+        for(let i = 0; i <= 256/magicNum; i++) {
+            let val = magicNum * i;
+            if(val <= ipVal) { baseNet = val; multiSequence.push(val); }
+            else if(multiSequence.length < 5) { multiSequence.push(val); break; }
+        }
 
         els.magicSteps.innerHTML = `
             <div class="flex gap-3 items-start">
                 <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow-lg">1</div>
                 <div class="w-full">
                     <p>Encuentra el octeto interesante: El <strong>${ordinal[interestingIdx]} octeto</strong>.</p>
-                    <p class="text-xs text-slate-400 mt-1 italic">¿Por qué? Aquí es donde la máscara deja de ser puros 1s. Marca la "frontera" exacta donde tu red se divide de tus hosts.</p>
+                    <p class="text-xs text-slate-400 mt-1 italic">¿Por qué? Aquí es donde la máscara deja de ser puros 1s. Marca la "frontera" exacta donde tu red se divide.</p>
                     ${sumHTML}
                 </div>
             </div>
@@ -449,16 +511,17 @@
                 <div class="w-full">
                     <p>Calcula el <strong>Número Mágico (Tamaño de bloque)</strong> restando a 256:</p>
                     <code class="bg-slate-900 px-2 py-1 mt-2 inline-block rounded text-yellow-300 font-bold border border-slate-700 text-lg shadow-inner">256 - ${maskVal} = ${magicNum}</code>
-                    <p class="text-xs text-slate-400 mt-2 italic">¿Por qué 256? Es el total matemático de combinaciones en un octeto (del 0 al 255). Restarle la máscara nos revela de cuánto en cuánto saltan nuestras subredes.</p>
                 </div>
             </div>
             
             <div class="flex gap-3 items-start">
                 <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow-lg">3</div>
                 <div class="w-full">
-                    <p>Multiplica <strong class="text-yellow-300">${magicNum}</strong> hasta acercarte al número de tu IP original (<strong class="text-blue-300">${ipVal}</strong>) sin pasarte:</p>
-                    <p class="mt-2 font-mono text-sm">0, ${magicNum}... <code class="bg-purple-900 px-2 py-0.5 rounded text-purple-200 font-bold border border-purple-500 shadow">${baseNet}</code></p>
-                    <p class="text-xs text-slate-400 mt-2 italic">¿Por qué multiplicamos? Estamos buscando en qué "bloque" exacto cayó tu IP. El múltiplo que no se pasa es donde arranca tu subred (Tu ID de Red).</p>
+                    <p>Genera la tabla de multiplicar del <strong class="text-yellow-300">${magicNum}</strong> (<span class="text-[10px] text-slate-400">${magicNum}x0, ${magicNum}x1, ${magicNum}x2...</span>) hasta acercarte al número de tu IP original (<strong class="text-blue-300">${ipVal}</strong>) sin pasarte:</p>
+                    <p class="mt-2 font-mono text-sm tracking-widest text-slate-400">
+                        ${multiSequence.map(v => v === baseNet ? `<code class="bg-purple-900 px-2 py-0.5 rounded text-purple-200 font-bold border border-purple-500 shadow text-base tracking-normal">${v}</code>` : v).join(', ')}...
+                    </p>
+                    <p class="text-xs text-slate-400 mt-2 italic">¿Por qué multiplicamos? El múltiplo que no se pasa (${baseNet}) es donde arranca tu subred específica (Tu ID de Red).</p>
                 </div>
             </div>
         `;
@@ -468,10 +531,15 @@
 
     function refreshUI() {
         const info = calculateNetwork();
+        const cidrCtx = getCidrContext(state.cidr);
         
         els.displayCidr.innerText = `/${state.cidr}`;
         els.badgeClass.innerText = info.netClass.name;
         els.badgeClass.className = `text-xs px-3 py-1 rounded-full border font-bold ${info.netClass.color}`;
+        
+        els.cidrIcon.innerText = cidrCtx.icon;
+        els.cidrDesc.innerText = cidrCtx.text;
+        els.cidrClass.innerText = cidrCtx.class;
         
         renderBinaryDisplay(els.binIp, state.ip, 'ip');
         renderBinaryDisplay(els.binMask, info.mask, 'mask');
@@ -491,31 +559,25 @@
         if (!audioInitialized) initAudio();
         state.isFiltered = false; refreshUI();
         els.btnAnimate.disabled = true; els.btnAnimate.innerHTML = 'Filtrando...';
-
         playFilterAnimation();
 
         const maskBoxes = els.binMask.querySelectorAll('.bit-box');
         maskBoxes.forEach((box, i) => {
             box.style.animation = 'none'; void box.offsetWidth;
-            box.style.animation = `dropFilter 0.4s ease-out forwards`;
-            box.style.animationDelay = `${i * 10}ms`;
+            box.style.animation = `dropFilter 0.4s ease-out forwards`; box.style.animationDelay = `${i * 10}ms`;
         });
 
         setTimeout(() => {
             state.isFiltered = true; refreshUI(); playResultMagic();
-            
             const resultBoxes = els.binResult.querySelectorAll('.bit-box');
             resultBoxes.forEach((box, i) => {
                 box.style.transform = 'scale(0.5)'; box.style.opacity = '0';
                 setTimeout(() => {
                     box.style.transition = 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
                     box.style.transform = 'scale(1)'; box.style.opacity = '1';
-                    if (i >= state.cidr) {
-                        box.style.backgroundColor = '#ef4444'; setTimeout(() => box.style.backgroundColor = '', 200);
-                    }
+                    if (i >= state.cidr) { box.style.backgroundColor = '#ef4444'; setTimeout(() => box.style.backgroundColor = '', 200); }
                 }, i * 15);
             });
-
             setTimeout(() => { els.btnAnimate.disabled = false; els.btnAnimate.innerHTML = `NUEVO FILTRO`; }, 600);
         }, 500);
     }
