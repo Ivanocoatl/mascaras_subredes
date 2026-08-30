@@ -52,7 +52,7 @@
         .bit-unknown { background-color: #1e293b; color: #64748b; border: 1px dashed #334155; }
 
         .octet-wrapper { display: flex; flex-direction: column; align-items: center; margin-right: 4px; }
-        .bit-headers { display: flex; width: 100%; justify-content: space-around; font-size: 0.45rem; color: #64748b; margin-bottom: 2px; font-weight: bold; }
+        .bit-headers { display: flex; width: 100%; justify-content: space-around; font-size: 0.45rem; color: #94a3b8; margin-bottom: 2px; font-weight: bold; }
         .octet-group { display: flex; flex-wrap: nowrap; padding: 2px; background: rgba(255,255,255,0.03); border-radius: 6px; }
         .binary-row { display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 6px; }
 
@@ -84,7 +84,6 @@
         .ip-input:focus { outline: none; border-color: #60a5fa; background: rgba(59, 130, 246, 0.1); }
         input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
         
-        /* Highlight para el octeto interesante */
         .highlight-octet { background-color: rgba(234, 179, 8, 0.2); color: #fde047; font-weight: bold; padding: 0 4px; border-radius: 4px; border: 1px solid rgba(234, 179, 8, 0.5); }
     </style>
 </head>
@@ -173,11 +172,11 @@
         </div>
 
         <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/30 p-4 rounded-xl relative">
-            <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-2 py-1 rounded-bl-lg uppercase">Truco Mental</div>
-            <h3 class="font-bold text-indigo-300 mb-3 text-sm flex items-center gap-2">
-                <span class="text-xl">🧙‍♂️</span> Número Mágico y Cuadritos
+            <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-2 py-1 rounded-bl-lg uppercase">Paso a paso</div>
+            <h3 class="font-bold text-indigo-300 mb-4 text-sm flex items-center gap-2">
+                <span class="text-xl">🧙‍♂️</span> Construyendo el "Número Mágico"
             </h3>
-            <div id="magic-trick-steps" class="space-y-4 text-xs sm:text-sm text-slate-300"></div>
+            <div id="magic-trick-steps" class="space-y-5 text-sm text-slate-200"></div>
         </div>
         
         <div class="mt-5 pt-4 border-t border-slate-700/50" id="subnet-list-container">
@@ -283,7 +282,6 @@
                 if (type === 'ip') {
                     box.className = `bit-box interactive-bit ${bitValue === '1' ? 'switch-on' : 'switch-off'}`;
                     box.innerText = bitValue;
-                    // Interacción del usuario con los bits
                     box.onclick = () => {
                         let currentDec = state.ip[octetIdx];
                         let valToToggle = bitValues[i];
@@ -319,34 +317,61 @@
 
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
         let baseIp = [...info.netId];
-        // Reiniciar a 0 los octetos inferiores para mostrar desde el inicio del bloque
         for(let i = interestingIdx + 1; i < 4; i++) baseIp[i] = 0;
         
+        let hostBits = 32 - state.cidr;
+        let totalIps = Math.pow(2, hostBits);
+        let usefulIps = totalIps - 2;
+
+        let rightOctetsExplanation = "";
+        // Si el octeto interesante NO es el cuarto, explicamos qué pasa con los que están a su derecha.
+        if (interestingIdx < 3) {
+            rightOctetsExplanation = `
+                <div class="mt-4 bg-indigo-900/30 p-3 sm:p-4 rounded-lg border border-indigo-500/40 text-xs sm:text-sm text-indigo-100 shadow-inner">
+                    <h4 class="font-bold text-indigo-300 mb-2 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        ¿Por qué el último octeto es 0 o 255? ¿Se pueden usar?
+                    </h4>
+                    <p class="mb-2">Como el corte de tu red (la máscara) cae en el <strong>${ordinal[interestingIdx].toLowerCase()} octeto</strong>, todos los octetos a su derecha son exclusivamente <strong>espacio para dispositivos (bits de host)</strong>.</p>
+                    <ul class="list-disc pl-4 space-y-1 text-indigo-200 mb-2">
+                        <li><strong>ID de Red:</strong> Matématicamente, TODOS los bits de host se apagan a la vez (por eso ves <code class="text-indigo-400">.0</code>).</li>
+                        <li><strong>Broadcast:</strong> TODOS los bits de host se encienden a la vez (por eso ves <code class="text-indigo-400">.255</code>).</li>
+                    </ul>
+                    <p class="font-medium text-emerald-300">¡Sí se pueden usar los números de en medio! Las IPs útiles iteran por <em>todas</em> las combinaciones posibles (del .1 al .254) creando todo ese gran bloque de IPs por cada subred.</p>
+                </div>
+            `;
+        }
+
         let html = `
-            <div class="mb-4">
-                <h3 class="font-bold text-blue-300 text-sm mb-1 flex items-center gap-2">
+            <div class="mb-5">
+                <h3 class="font-bold text-blue-300 text-sm mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     Ejemplo de Subredes Creadas
                 </h3>
-                <div class="bg-slate-900/50 p-3 rounded border border-slate-700/50 text-xs text-slate-300 leading-relaxed">
-                    <p class="mb-2">El <strong class="text-yellow-400">${ordinal[interestingIdx]} octeto</strong> avanza sumando <span class="highlight-octet">+${magicNum}</span>.</p>
-                    <p>Cada subred te da <strong class="text-emerald-400">${info.hosts > 0 ? info.hosts : 0} IPs útiles</strong> para dispositivos.</p>
-                    <p class="text-[10px] text-slate-500 mt-1 border-t border-slate-800 pt-1">
-                        Fórmula: 2<sup>${32-state.cidr}</sup> (bits de host) - 2. <br>
-                        <em>¿Por qué -2?</em> Porque la primera IP se reserva para el ID de Red y la última para Broadcast.
-                    </p>
+                
+                <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/80 shadow-md">
+                    <p class="text-slate-200 mb-3 text-sm">El <strong class="text-yellow-400 text-base">${ordinal[interestingIdx]} octeto</strong> avanza sumando <span class="highlight-octet text-base">+${magicNum}</span>.</p>
+                    
+                    <div class="bg-slate-800/80 p-3 rounded border border-slate-600/50">
+                        <p class="text-sm sm:text-base text-emerald-400 font-bold mb-1">Fórmula de IPs: 2<sup>${hostBits}</sup> = <span class="text-emerald-300">${totalIps}</span></p>
+                        <p class="text-sm sm:text-base text-emerald-400 font-bold">IPs Útiles: ${totalIps} - 2 = <span class="text-white bg-emerald-700/50 px-2 py-0.5 rounded">${usefulIps}</span> por subred.</p>
+                        <p class="text-[11px] sm:text-xs text-slate-400 mt-2 font-normal italic border-t border-slate-700 pt-2">
+                            ¿Por qué restamos -2? Porque la primera IP (puros ceros en host) se reserva para identificar la Red, y la última (puros unos en host) es para el Broadcast. ¡No se pueden asignar a tu PC o celular!
+                        </p>
+                    </div>
                 </div>
+                ${rightOctetsExplanation}
             </div>
-            <div class="space-y-2">
+            <div class="space-y-3">
         `;
 
         let maxSteps = Math.floor(256 / magicNum);
-        let displayIndices = [0, 1, 2, maxSteps - 1]; // Mostrar las primeras 3 y la última
+        let displayIndices = [0, 1, 2, maxSteps - 1]; 
         displayIndices = [...new Set(displayIndices)].filter(idx => idx < maxSteps);
 
         displayIndices.forEach((idx, iterPos) => {
             if (iterPos > 0 && displayIndices[iterPos] - displayIndices[iterPos-1] > 1) {
-                html += `<div class="text-center text-slate-500 font-bold py-1 text-[10px]">... (saltando subredes intermedias) ...</div>`;
+                html += `<div class="text-center text-slate-500 font-bold py-2 text-xs">... (saltando subredes intermedias) ...</div>`;
             }
 
             let currentVal = idx * magicNum;
@@ -362,14 +387,14 @@
             const hl = (arr) => arr.map((v, i) => i === interestingIdx ? `<span class="highlight-octet">${v}</span>` : v).join('.');
 
             html += `
-                <div class="bg-slate-800/40 p-2 rounded border ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? 'border-purple-500 bg-purple-900/20' : 'border-slate-700'} text-xs">
-                    <div class="font-bold text-blue-300 mb-1 flex justify-between">
-                        <span>Subred #${idx + 1}</span>
-                        ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? '<span class="text-[8px] bg-purple-600 text-white px-1.5 py-0.5 rounded uppercase">Tu IP está aquí</span>' : ''}
+                <div class="bg-slate-800/60 p-3 rounded-lg border ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? 'border-purple-500 bg-purple-900/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'border-slate-700'} text-xs sm:text-sm transition-all">
+                    <div class="font-bold text-blue-300 mb-2 flex justify-between items-center border-b border-slate-700/50 pb-1">
+                        <span class="text-base">Subred #${idx + 1}</span>
+                        ${state.ip[interestingIdx] >= currentVal && state.ip[interestingIdx] < nextVal ? '<span class="text-[9px] bg-purple-600 text-white px-2 py-1 rounded shadow uppercase tracking-wider font-bold">Tu IP está aquí</span>' : ''}
                     </div>
-                    <div class="flex justify-between mb-0.5"><span class="text-slate-500">ID Red:</span> <span class="font-mono text-purple-300">${hl(net)}</span></div>
-                    <div class="flex justify-between mb-0.5"><span class="text-slate-500">IPs Útiles:</span> <span class="font-mono text-emerald-300">${hl(first)} - ${hl(last)}</span></div>
-                    <div class="flex justify-between"><span class="text-slate-500">Broadcast:</span> <span class="font-mono text-red-300">${hl(bcast)}</span></div>
+                    <div class="flex justify-between mb-1"><span class="text-slate-400">ID Red:</span> <span class="font-mono text-purple-300">${hl(net)}</span></div>
+                    <div class="flex justify-between mb-1"><span class="text-slate-400">IPs Útiles:</span> <span class="font-mono text-emerald-300">${hl(first)} - ${hl(last)}</span></div>
+                    <div class="flex justify-between"><span class="text-slate-400">Broadcast:</span> <span class="font-mono text-red-300">${hl(bcast)}</span></div>
                 </div>
             `;
         });
@@ -379,17 +404,15 @@
 
     function renderMentalTrick(info) {
         let interestingIdx = -1;
-        // Encuentra el octeto donde la máscara no es ni 255 ni 0 (o el límite exacto)
         for(let i=0; i<4; i++) {
             if(info.mask[i] >= 0 && info.mask[i] < 255) { interestingIdx = i; break; }
         }
         
-        // Excepción para /8, /16, /24 donde salta en el octeto anterior exactamente
         if (state.cidr % 8 === 0 && state.cidr < 32) { interestingIdx = (state.cidr / 8); }
 
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
         if (interestingIdx === -1 || state.cidr === 32) {
-            els.magicSteps.innerHTML = `<div class="bg-blue-900/30 p-2 rounded border border-blue-500/30">Mascara completa (/32). Corresponde a un único dispositivo (host route). No hay cálculo de bloques.</div>`;
+            els.magicSteps.innerHTML = `<div class="bg-blue-900/30 p-2 rounded border border-blue-500/30 text-sm">Mascara completa (/32). Corresponde a un único dispositivo (host route). No hay cálculo de bloques.</div>`;
             els.subnetContainer.innerHTML = ''; return;
         }
 
@@ -397,37 +420,46 @@
         const ipVal = state.ip[interestingIdx];
         const magicNum = 256 - maskVal;
 
-        // Visualización de "cuadritos" sumando
         let bitVals = [128, 64, 32, 16, 8, 4, 2, 1];
         let sumHTML = `<div class="flex flex-wrap gap-1 mt-2 items-center bg-slate-900/50 p-2 rounded border border-slate-700/50">`;
         let added = [];
         bitVals.forEach(val => {
             let isOn = (maskVal & val) !== 0;
             if(isOn) added.push(val);
-            let style = isOn ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-slate-800 text-slate-500 border-slate-700';
+            let style = isOn ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-slate-800 text-slate-500 border-slate-700 opacity-50';
             sumHTML += `<div class="text-[10px] px-1.5 py-0.5 rounded border ${style}">${val}</div>`;
         });
-        sumHTML += `<div class="w-full mt-2 font-bold text-emerald-400 text-xs text-center border-t border-slate-700 pt-2">= ${added.join(' + ')} = ${maskVal}</div></div>`;
+        sumHTML += `<div class="w-full mt-2 font-bold text-emerald-400 text-xs sm:text-sm text-center border-t border-slate-700 pt-2">= ${added.join(' + ')} = <span class="text-lg">${maskVal}</span></div></div>`;
         
         let baseNet = 0; while ((baseNet + magicNum) <= ipVal) { baseNet += magicNum; }
         let nextNet = baseNet + magicNum;
 
         els.magicSteps.innerHTML = `
-            <div class="flex gap-2 items-start">
-                <div class="bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">1</div>
-                <div class="w-full">Encuentra el octeto interesante: El <strong>${ordinal[interestingIdx]} octeto</strong>, porque es donde la máscara se corta.
+            <div class="flex gap-3 items-start">
+                <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow-lg">1</div>
+                <div class="w-full">
+                    <p>Encuentra el octeto interesante: El <strong>${ordinal[interestingIdx]} octeto</strong>.</p>
+                    <p class="text-xs text-slate-400 mt-1 italic">¿Por qué? Aquí es donde la máscara deja de ser puros 1s. Marca la "frontera" exacta donde tu red se divide de tus hosts.</p>
                     ${sumHTML}
                 </div>
             </div>
-            <div class="flex gap-2 items-start">
-                <div class="bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">2</div>
-                <div>Calcula el <strong>Número Mágico</strong> (Saltos de red) restando a 256:<br> 
-                <code class="bg-slate-900 px-1.5 py-0.5 mt-1 inline-block rounded text-yellow-300 font-bold border border-slate-700">256 - ${maskVal} = ${magicNum}</code></div>
+            
+            <div class="flex gap-3 items-start">
+                <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow-lg">2</div>
+                <div class="w-full">
+                    <p>Calcula el <strong>Número Mágico (Tamaño de bloque)</strong> restando a 256:</p>
+                    <code class="bg-slate-900 px-2 py-1 mt-2 inline-block rounded text-yellow-300 font-bold border border-slate-700 text-lg shadow-inner">256 - ${maskVal} = ${magicNum}</code>
+                    <p class="text-xs text-slate-400 mt-2 italic">¿Por qué 256? Es el total matemático de combinaciones en un octeto (del 0 al 255). Restarle la máscara nos revela de cuánto en cuánto saltan nuestras subredes.</p>
+                </div>
             </div>
-            <div class="flex gap-2 items-start">
-                <div class="bg-indigo-600 text-white rounded-full w-5 h-5 flex items-center justify-center font-bold text-xs shrink-0 mt-0.5">3</div>
-                <div>Multiplica ${magicNum} hasta acercarte a tu IP (<span class="text-blue-300">${ipVal}</span>) sin pasarte:<br>
-                0, ${magicNum}... <code class="bg-purple-900 px-1 rounded text-purple-300 font-bold border border-purple-700">${baseNet}</code> es tu límite. <strong>¡Es el ID de Red!</strong></div>
+            
+            <div class="flex gap-3 items-start">
+                <div class="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center font-bold text-sm shrink-0 mt-0.5 shadow-lg">3</div>
+                <div class="w-full">
+                    <p>Multiplica <strong class="text-yellow-300">${magicNum}</strong> hasta acercarte al número de tu IP original (<strong class="text-blue-300">${ipVal}</strong>) sin pasarte:</p>
+                    <p class="mt-2 font-mono text-sm">0, ${magicNum}... <code class="bg-purple-900 px-2 py-0.5 rounded text-purple-200 font-bold border border-purple-500 shadow">${baseNet}</code></p>
+                    <p class="text-xs text-slate-400 mt-2 italic">¿Por qué multiplicamos? Estamos buscando en qué "bloque" exacto cayó tu IP. El múltiplo que no se pasa es donde arranca tu subred (Tu ID de Red).</p>
+                </div>
             </div>
         `;
 
