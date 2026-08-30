@@ -74,7 +74,6 @@
 
     <section class="glass-card p-4 sm:p-5">
         <div class="flex flex-col gap-4">
-            
             <!-- PANEL ORIGEN -->
             <div class="bg-blue-900/10 p-3 rounded-xl border border-blue-900/50">
                 <div class="flex justify-between items-center mb-3">
@@ -83,8 +82,8 @@
                         <span class="text-[9px] text-slate-400">Desde dónde envías</span>
                     </div>
                     <div class="flex items-center gap-1 text-blue-300 font-bold">
-                        <input type="number" id="ip-oct-0" class="ip-input" value="172" min="0" max="255">.
-                        <input type="number" id="ip-oct-1" class="ip-input" value="16" min="0" max="255">.
+                        <input type="number" id="ip-oct-0" class="ip-input" value="192" min="0" max="255">.
+                        <input type="number" id="ip-oct-1" class="ip-input" value="168" min="0" max="255">.
                         <input type="number" id="ip-oct-2" class="ip-input" value="1" min="0" max="255">.
                         <input type="number" id="ip-oct-3" class="ip-input" value="50" min="0" max="255">
                     </div>
@@ -92,9 +91,9 @@
                 <div>
                     <div class="flex justify-between items-end mb-1">
                         <span class="text-[10px] sm:text-xs font-bold text-emerald-400 uppercase">Máscara Origen</span>
-                        <span class="text-lg font-bold pixel-font text-emerald-400" id="display-cidr-src">/23</span>
+                        <span class="text-lg font-bold pixel-font text-emerald-400" id="display-cidr-src">/24</span>
                     </div>
-                    <input type="range" id="slider-cidr-src" min="8" max="30" value="23" class="w-full">
+                    <input type="range" id="slider-cidr-src" min="8" max="30" value="24" class="w-full">
                 </div>
             </div>
 
@@ -106,9 +105,9 @@
                         <span class="text-[9px] text-slate-400">A quién le hablas</span>
                     </div>
                     <div class="flex items-center gap-1 text-orange-300 font-bold">
-                        <input type="number" id="dest-oct-0" class="ip-input ip-input-dest" value="172" min="0" max="255">.
-                        <input type="number" id="dest-oct-1" class="ip-input ip-input-dest" value="16" min="0" max="255">.
-                        <input type="number" id="dest-oct-2" class="ip-input ip-input-dest" value="2" min="0" max="255">.
+                        <input type="number" id="dest-oct-0" class="ip-input ip-input-dest" value="192" min="0" max="255">.
+                        <input type="number" id="dest-oct-1" class="ip-input ip-input-dest" value="168" min="0" max="255">.
+                        <input type="number" id="dest-oct-2" class="ip-input ip-input-dest" value="1" min="0" max="255">.
                         <input type="number" id="dest-oct-3" class="ip-input ip-input-dest" value="200" min="0" max="255">
                     </div>
                 </div>
@@ -122,14 +121,13 @@
             </div>
             
             <p class="text-[10px] text-slate-400 text-center italic mt-1">¿Por qué difieren? El Admin de red decide los tamaños. Ej: Ventas usa /24, pero Servidores usa /23.</p>
-
         </div>
     </section>
 
     <!-- VISUALIZADOR -->
     <section class="glass-card p-3 sm:p-5 flex flex-col items-center overflow-hidden relative" id="visualizer-container">
         <p class="text-xs text-slate-300 mb-4 text-center w-full bg-blue-900/40 p-2 rounded border border-blue-800">
-            <strong>REGLA DE ORO:</strong> Tu PC <span class="underline">NO conoce</span> la máscara destino. Para decidir, le aplica <strong>SU PROPIA máscara</strong> a la IP Destino.
+            <strong>REGLA DE ORO (El truco de la PC):</strong> Tu máquina <span class="underline">NO conoce</span> la máscara destino. Para decidir, le aplica <strong>SU PROPIA máscara</strong> a la IP Destino.
         </p>
         
         <div class="w-full mb-2">
@@ -182,13 +180,39 @@
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/30 p-4 rounded-xl relative">
+        <div class="bg-gradient-to-br from-indigo-900/40 to-slate-800/40 border border-indigo-500/30 p-4 rounded-xl relative mb-6">
             <div class="absolute top-0 right-0 bg-indigo-500 text-white text-[8px] font-bold px-2 py-1 rounded-bl-lg uppercase">Paso a paso</div>
             <h3 class="font-bold text-indigo-300 mb-4 text-sm flex items-center gap-2"><span class="text-xl">🧙‍♂️</span> Construyendo el "Número Mágico" (Origen)</h3>
             <div id="magic-trick-steps" class="space-y-5 text-sm text-slate-200"></div>
         </div>
         
-        <div class="mt-5 pt-4 border-t border-slate-700/50" id="subnet-list-container"></div>
+        <div class="pt-4 border-t border-slate-700/50" id="subnet-list-container"></div>
+
+        <!-- EXPLICACIÓN NAT Y AND ESTÁTICA -->
+        <div class="mt-6 bg-gradient-to-br from-blue-900/50 to-slate-900/80 border-2 border-blue-500/50 p-4 rounded-xl shadow-lg relative overflow-hidden group hover:border-blue-400 transition-colors cursor-help" onclick="playSwitchTick()">
+            <div class="absolute -right-4 -top-4 opacity-10 text-8xl group-hover:opacity-20 transition-opacity">🌐</div>
+            <h3 class="font-bold text-blue-300 mb-3 text-sm sm:text-base flex items-center gap-2 relative z-10">
+                ¿Para qué sirve el AND en la vida real? (Decisión LAN vs WAN)
+            </h3>
+            <div class="text-xs sm:text-sm text-slate-300 space-y-3 relative z-10">
+                <p>El <strong>Bitwise AND</strong> no solo crea subredes. ¡Es la brújula de tu PC! Cuando intentas enviar un mensaje a otra IP, tu dispositivo hace esto en microsegundos:</p>
+                <div class="bg-slate-950/80 p-3 rounded border border-slate-700 font-mono text-[10px] sm:text-xs space-y-2">
+                    <div>1. AND( <span class="text-blue-400">Tu IP Origen</span>, <span class="text-emerald-400">Tu Máscara Origen</span> ) = <span class="text-purple-400">Tu ID de Red</span></div>
+                    <div>2. AND( <span class="text-orange-400">IP Destino</span>, <span class="text-emerald-400">Tu Máscara Origen</span> ) = <span class="text-purple-400">ID de Red Destino (Calculado)</span></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+                    <div class="bg-green-900/30 border border-green-700/50 p-3 rounded">
+                        <div class="text-green-400 font-bold mb-1">🏠 Si son Iguales (LAN)</div>
+                        <p class="text-[11px]">Sabe que el dispositivo está en tu misma red. Se comunican directo a través del Switch usando direcciones MAC (ARP).</p>
+                    </div>
+                    <div class="bg-orange-900/30 border border-orange-700/50 p-3 rounded">
+                        <div class="text-orange-400 font-bold mb-1">🌍 Si son Diferentes (WAN)</div>
+                        <p class="text-[11px]">Sabe que está en Internet (o en otra red). Envía el paquete a tu Router (Puerta de enlace) para que haga <strong>NAT</strong> y lo saque al mundo exterior.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 </main>
 
@@ -211,13 +235,7 @@
     function playFilterAnimation() { if(audioInitialized) { const now = Tone.now(); dropSynth.triggerAttackRelease("C5", "16n", now); dropSynth.triggerAttackRelease("G4", "16n", now + 0.1); dropSynth.triggerAttackRelease("C4", "8n", now + 0.2); } }
     function playResultMagic() { if(audioInitialized) successSynth.triggerAttackRelease(["C4", "E4", "G4", "C5"], "8n", Tone.now()); }
 
-    let state = { 
-        ip: [172, 16, 1, 50], 
-        ipDest: [172, 16, 2, 200],
-        cidrSrc: 23, 
-        cidrDest: 24,
-        isFiltered: false 
-    };
+    let state = { ip: [192, 168, 1, 50], ipDest: [192, 168, 1, 200], cidrSrc: 24, cidrDest: 24, isFiltered: false };
 
     function dec2bin(dec) { return (dec >>> 0).toString(2).padStart(8, '0'); }
     function ipToInt(ipArr) { return (ipArr[0] << 24 | ipArr[1] << 16 | ipArr[2] << 8 | ipArr[3]) >>> 0; }
@@ -246,24 +264,19 @@
         const maskDest = getMaskFromCidr(state.cidrDest);
         const netClass = getNetworkClass(state.ip);
         
-        // Red Origen Real
         const netIdSrc = state.ip.map((val, idx) => val & maskSrc[idx]);
         const invertedMaskSrc = maskSrc.map(val => ~val & 255);
         const broadcastSrc = netIdSrc.map((val, idx) => val | invertedMaskSrc[idx]);
         
-        // Decisión del PC: ¿Destino con MI máscara origen coincide con mi red?
         const netIdDestPerceivedBySrc = state.ipDest.map((val, idx) => val & maskSrc[idx]);
         const isLan = netIdSrc.join('.') === netIdDestPerceivedBySrc.join('.');
-
-        // Red Destino Real (Lo que sabe el Router del otro lado)
         const netIdDestTrue = state.ipDest.map((val, idx) => val & maskDest[idx]);
 
-        // Cálculos matemáticos de la Red Origen
         let hosts = Math.pow(2, 32 - state.cidrSrc) - 2;
         if (state.cidrSrc === 32) hosts = 0; if (state.cidrSrc === 31) hosts = 2; 
 
         let borrowedBits = state.cidrSrc - netClass.defaultCidr;
-        let totalSubnets = borrowedBits >= 0 ? Math.pow(2, borrowedBits) : 1;
+        let totalSubnets = borrowedBits > 0 ? Math.pow(2, borrowedBits) : 1;
         
         let subnetIndex = 1;
         if (borrowedBits > 0) {
@@ -330,10 +343,15 @@
         let totalIps = Math.pow(2, hostBits);
         let usefulIps = totalIps - 2;
 
-        let borrowedBits = state.cidrSrc - info.netClass.defaultCidr;
-        let subnetText = borrowedBits >= 0 
-            ? `Subredes creadas: 2<sup>${borrowedBits}</sup> <span class="text-xs font-normal text-slate-400">(${borrowedBits} bits robados a la Clase ${info.netClass.name.replace('Clase ', '')})</span> = <span class="text-blue-300">${Math.pow(2, borrowedBits)}</span> subredes totales.`
-            : `Estás haciendo Supernetting (sumando redes de Clase ${info.netClass.name.replace('Clase ', '')}).`;
+        // LÓGICA REFINADA PARA BITS PRESTADOS VS NO PRESTADOS
+        let subnetText = "";
+        if (info.borrowedBits > 0) {
+            subnetText = `Subredes creadas: 2<sup>${info.borrowedBits}</sup> <span class="text-xs font-normal text-slate-400">(${info.borrowedBits} bits robados a la ${info.netClass.name})</span> = <span class="text-blue-300">${info.totalSubnets}</span> subredes totales.`;
+        } else if (info.borrowedBits === 0) {
+            subnetText = `<span class="text-blue-300">No estás creando subredes.</span> Estás usando la máscara por defecto exacta (/${state.cidrSrc}) de tu Clase. Toda la red es un solo bloque indivisible.`;
+        } else {
+            subnetText = `<span class="text-yellow-400">Estás haciendo Supernetting.</span> Has fusionado redes quitándole bits a la máscara por defecto de la ${info.netClass.name}.`;
+        }
 
         let rightOctetsExplanation = "";
         if (interestingIdx < 3) {
@@ -355,27 +373,23 @@
             <div class="mb-5">
                 <h3 class="font-bold text-blue-300 text-sm mb-2 flex items-center gap-2">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    Fórmulas y Estructura (Para Tu Red Origen)
+                    Fórmulas y Estructura (Diseño Humano)
                 </h3>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <!-- FÓRMULA DE DISPOSITIVOS -->
                     <div class="bg-slate-800/80 p-3 rounded border border-emerald-600/50">
                         <h4 class="text-emerald-400 font-bold mb-1 text-sm border-b border-emerald-700/50 pb-1">1. ¿Cuántos Dispositivos (Hosts)?</h4>
-                        <p class="text-xs text-slate-300 mb-1">Se calcula con los bits "sobrantes" de la máscara (Ceros): <br><span class="font-mono bg-slate-900 px-1 rounded inline-block mt-1">32 bits - /${state.cidrSrc} = ${hostBits} bits de host</span></p>
+                        <p class="text-xs text-slate-300 mb-1">Se calcula con los bits "sobrantes" de la máscara (Los Ceros):</p>
+                        <p class="font-mono bg-slate-900 px-1 rounded inline-block text-xs mt-1 text-emerald-200">32 bits totales - /${state.cidrSrc} = ${hostBits} bits de host</p>
                         <p class="text-sm font-bold text-emerald-300 mt-2">2<sup>${hostBits}</sup> = ${totalIps} IPs Totales</p>
-                        <p class="text-xs text-slate-400 italic mt-1">-2 (Se quita ID Red y Broadcast) = <strong class="text-emerald-400">${usefulIps} IPs Útiles</strong> por subred.</p>
+                        <p class="text-[10px] sm:text-xs text-slate-400 italic mt-1">-2 (Se quita ID Red y Broadcast) = <strong class="text-emerald-400">${usefulIps} IPs Útiles</strong> por subred.</p>
                     </div>
 
-                    <div class="bg-slate-800/80 p-3 rounded border border-blue-600/50">
-                        <h4 class="text-blue-400 font-bold mb-1 text-sm border-b border-blue-700/50 pb-1">2. ¿Cuántas Subredes?</h4>
-                        ${ info.borrowedBits >= 0 ? `
-                        <p class="text-xs text-slate-300 mb-1">Se calcula con los bits "robados" a la Clase original de la IP (${info.netClass.name} es /${info.netClass.defaultCidr}): <br><span class="font-mono bg-slate-900 px-1 rounded inline-block mt-1">/${state.cidrSrc} - /${info.netClass.defaultCidr} = ${info.borrowedBits} bits prestados</span></p>
-                        <p class="text-sm font-bold text-blue-300 mt-2">2<sup>${info.borrowedBits}</sup> = ${info.totalSubnets} Subredes</p>
-                        ` : `
-                        <p class="text-xs text-yellow-300 mt-2">Tu máscara /${state.cidrSrc} es MENOR a la predeterminada de la ${info.netClass.name} (/${info.netClass.defaultCidr}).</p>
-                        <p class="text-sm font-bold text-yellow-400 mt-2">Estás haciendo SUPERNETTING</p>
-                        <p class="text-xs text-slate-400 mt-1">Has robado bits en reversa. Estás fusionando redes pequeñas en una más grande.</p>
-                        `}
+                    <!-- FÓRMULA DE SUBREDES -->
+                    <div class="bg-slate-800/80 p-3 rounded border border-blue-600/50 flex flex-col justify-center">
+                        <h4 class="text-blue-400 font-bold mb-1 text-sm border-b border-blue-700/50 pb-1">2. ¿Cuántas Subredes Máximas?</h4>
+                        <p class="text-xs sm:text-sm text-slate-300 mt-1">${subnetText}</p>
                     </div>
                 </div>
 
@@ -413,7 +427,7 @@
             html += `
                 <div class="bg-slate-800/60 p-3 rounded-lg border ${isUserSubnet ? 'border-purple-500 bg-purple-900/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]' : 'border-slate-700'} text-xs sm:text-sm">
                     <div class="font-bold text-blue-300 mb-2 flex justify-between items-center border-b border-slate-700/50 pb-1">
-                        <span class="text-base">Subred #${idx + 1}</span>
+                        <span class="text-base">${info.borrowedBits > 0 ? `Subred #${idx + 1}` : `Red Única`}</span>
                         ${isUserSubnet ? '<span class="text-[9px] bg-purple-600 text-white px-2 py-1 rounded shadow uppercase tracking-wider font-bold">Tu IP Origen está aquí</span>' : ''}
                     </div>
                     <div class="flex justify-between mb-1"><span class="text-slate-400" title="Todos los bits de host en 0">ID Red (Apagados):</span> <span class="font-mono text-purple-300">${hl(net)}</span></div>
@@ -442,7 +456,8 @@
     function renderMentalTrick(info) {
         let interestingIdx = -1;
         for(let i=0; i<4; i++) { if(info.maskSrc[i] >= 0 && info.maskSrc[i] < 255) { interestingIdx = i; break; } }
-        if (state.cidrSrc % 8 === 0 && state.cidrSrc < 32) { interestingIdx = (state.cidrSrc / 8); }
+        if (state.cidrSrc % 8 === 0 && state.cidrSrc < 32) { interestingIdx = (state.cidrSrc / 8) - 1; } // Fix for /8, /16, /24 exact bounds
+        
         const ordinal = ["Primer", "Segundo", "Tercer", "Cuarto"];
         if (interestingIdx === -1 || state.cidrSrc === 32) {
             els.magicSteps.innerHTML = `<div class="bg-blue-900/30 p-2 rounded border border-blue-500/30 text-sm">Mascara completa (/32). Host route. No hay cálculo de bloques.</div>`;
@@ -488,13 +503,11 @@
     function refreshUI() {
         const info = calculateNetwork(); 
         
-        // Update Headers
         els.badgeClass.innerText = info.netClass.name; els.badgeClass.className = `text-xs px-3 py-1 rounded-full border font-bold ${info.netClass.color}`;
         
         els.displayCidrSrc.innerText = `/${state.cidrSrc}`;
         els.displayCidrDest.innerText = `/${state.cidrDest}`;
         
-        // Update Binaries (Show Source IP with Source Mask)
         renderBinaryDisplay(els.binIp, state.ip, 'ip'); 
         renderBinaryDisplay(els.binMask, info.maskSrc, 'mask'); 
         renderBinaryDisplay(els.binResult, info.netIdSrc, 'result');
@@ -505,7 +518,10 @@
             els.resNet.innerText = info.netIdSrc.join('.'); 
             els.resBroadcast.innerText = info.broadcastSrc.join('.');
             els.resHosts.innerText = info.hosts;
-            els.resSubnetIndex.innerText = state.cidrSrc >= info.netClass.defaultCidr ? `#${info.subnetIndex} de ${info.totalSubnets}` : `Supernet`;
+            
+            if (info.borrowedBits > 0) els.resSubnetIndex.innerText = `#${info.subnetIndex} de ${info.totalSubnets}`;
+            else if (info.borrowedBits === 0) els.resSubnetIndex.innerText = `Red Única (Sin subnetting)`;
+            else els.resSubnetIndex.innerText = `Supernet`;
 
             if(info.isLan) {
                 els.dashDecision.className = "p-4 text-center border-b border-slate-700 transition-colors duration-500 bg-green-900/30 text-green-300";
@@ -516,7 +532,7 @@
                 els.dashDecision.className = "p-4 text-center border-b border-slate-700 transition-colors duration-500 bg-orange-900/30 text-orange-300";
                 els.decIcon.innerText = "🌍 WAN";
                 els.decTitle.innerText = "¡Están en Redes Diferentes!";
-                els.decDesc.innerHTML = `Tu PC le aplicó su máscara <strong>/${state.cidrSrc}</strong> al destino y dedujo que la red allá es <strong class="text-white">${info.netIdDestPerceivedBySrc.join('.')}</strong>. Como NO ES IGUAL a tu red (<strong class="text-white">${info.netIdSrc.join('.')}</strong>), el paquete se enviará al Router (Gateway) para ser enrutado. <br><span class="text-[10px] text-orange-400 mt-2 block">(Nota: La verdadera red del destino, configurada por el admin remoto con su /${state.cidrDest}, es ${info.netIdDestTrue.join('.')})</span>`;
+                els.decDesc.innerHTML = `Tu PC le aplicó su máscara <strong>/${state.cidrSrc}</strong> al destino y dedujo que la red allá es <strong class="text-white">${info.netIdDestPerceivedBySrc.join('.')}</strong>. Como NO ES IGUAL a tu red (<strong class="text-white">${info.netIdSrc.join('.')}</strong>), el paquete se enviará al Router (Gateway) para ser enrutado. <br><span class="text-[10px] text-orange-400 mt-2 block">(Nota: La verdadera red del destino, configurada por el humano con su /${state.cidrDest}, es ${info.netIdDestTrue.join('.')})</span>`;
             }
 
             renderMentalTrick(info); 
@@ -544,13 +560,11 @@
 
     els.btnStart.addEventListener('click', async () => { await initAudio(); els.screenStart.style.opacity = '0'; setTimeout(() => { els.screenStart.style.display = 'none'; els.mainApp.classList.remove('hidden'); els.mainApp.style.animation = 'dropFilter 0.5s ease-out forwards'; refreshUI(); }, 300); });
     
-    // Sliders
     els.sliderCidrSrc.addEventListener('input', (e) => { state.cidrSrc = parseInt(e.target.value); state.isFiltered = false; playTick(); refreshUI(); });
     els.sliderCidrDest.addEventListener('input', (e) => { state.cidrDest = parseInt(e.target.value); state.isFiltered = false; playTick(); refreshUI(); });
     
     els.btnAnimate.addEventListener('click', () => { if(state.isFiltered) { state.isFiltered = false; playTick(); refreshUI(); els.btnAnimate.innerHTML = `FILTRAR Y DECIDIR`; } else { executeFilterAnimation(); } });
     
-    // IP Inputs
     els.ipInputs.forEach((input, index) => {
         input.addEventListener('change', (e) => {
             let val = parseInt(e.target.value); if (isNaN(val) || val < 0) val = 0; if (val > 255) val = 255;
